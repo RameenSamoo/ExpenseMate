@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Category Management{% endblock %}
+
+{% block content %}
+<div class="filter-toolbar">
+  <div class="filter-group">
+    <button class="btn btn-primary" onclick="openCategoryModal('expense')">+ Add Expense Category</button>
+    <button class="btn btn-accent" onclick="openCategoryModal('income')">+ Add Income Category</button>
+  </div>
+</div>
+
+<div class="dashboard-grid cards-row-2">
+  <!-- Expense Categories Card -->
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">EXPENSE CATEGORIES</div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-financial">
+        <thead>
+          <tr>
+            <th>Category Name</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-expense-cats-body">
+          <tr><td colspan="2" class="empty-state">Loading categories...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Income Categories Card -->
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">INCOME CATEGORIES</div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-financial">
+        <thead>
+          <tr>
+            <th>Category Name</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-income-cats-body">
+          <tr><td colspan="2" class="empty-state">Loading categories...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-overlay" id="category-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="cat-modal-title">Add Category</div>
+      <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+    </div>
+    <form id="category-form" onsubmit="saveCategoryRecord(event)">
+      <div class="modal-body">
+        <input type="hidden" id="cat-id" value="">
+        <input type="hidden" id="cat-type" value="expense">
+
+        <div class="form-group">
+          <label class="form-label" for="cat-name">Category Name</label>
+          <input type="text" id="cat-name" class="form-control" placeholder="e.g. Travel, Gym Membership" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Category</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/categories.js') }}"></script>
+{% endblock %}

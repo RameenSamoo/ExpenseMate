@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Savings Goal Tracker{% endblock %}
+
+{% block content %}
+<!-- Top Metrics Row -->
+<div class="dashboard-grid cards-row-4">
+  <div class="metric-card savings">
+    <div class="metric-header"><span class="metric-label">TOTAL GOAL AMOUNT</span></div>
+    <div class="metric-value" id="g-metric-target">Rs. 0</div>
+    <div class="metric-sub">Combined Targets</div>
+  </div>
+
+  <div class="metric-card savings">
+    <div class="metric-header"><span class="metric-label">TOTAL SAVED AMOUNT</span></div>
+    <div class="metric-value" id="g-metric-saved">Rs. 0</div>
+    <div class="metric-sub">Accumulated Savings</div>
+  </div>
+
+  <div class="metric-card balance">
+    <div class="metric-header"><span class="metric-label">ACTIVE GOALS</span></div>
+    <div class="metric-value" id="g-metric-active">0</div>
+    <div class="metric-sub">Goals in progress</div>
+  </div>
+
+  <div class="metric-card income">
+    <div class="metric-header"><span class="metric-label">OVERALL PROGRESS</span></div>
+    <div class="metric-value" id="g-metric-progress">0%</div>
+    <div class="metric-sub">Total Portfolio Progress</div>
+  </div>
+</div>
+
+<!-- Goal Charts -->
+<div class="dashboard-grid cards-row-2">
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">GOALS DISTRIBUTION</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-goals-distribution"></canvas>
+    </div>
+  </div>
+
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">MONTHLY CONTRIBUTION TARGETS</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-goals-monthly"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="filter-toolbar">
+  <div style="font-weight: 700; color: var(--primary-dark); font-size: 1.05rem;">FINANCIAL GOALS</div>
+  <button class="btn btn-primary" onclick="openGoalModal()">+ Create Goal</button>
+</div>
+
+<!-- Goals Table -->
+<div class="card-panel" style="margin-bottom: 28px;">
+  <div class="table-responsive">
+    <table class="table-financial">
+      <thead>
+        <tr>
+          <th>Goal Name</th>
+          <th>Start Date</th>
+          <th>Target Date</th>
+          <th style="text-align: right;">Target</th>
+          <th style="text-align: right;">Saved</th>
+          <th style="text-align: right;">Monthly Target</th>
+          <th style="width: 140px;">Progress</th>
+          <th>Status</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-goals-body">
+        <tr><td colspan="9" class="empty-state">No financial goals set. Click "+ Create Goal" to begin!</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div class="modal-overlay" id="goal-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="goal-modal-title">Create Financial Goal</div>
+      <button class="modal-close" onclick="closeGoalModal()">&times;</button>
+    </div>
+    <form id="goal-form" onsubmit="saveGoalRecord(event)">
+      <div class="modal-body">
+        <input type="hidden" id="goal-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="goal-name">Goal Name</label>
+          <input type="text" id="goal-name" class="form-control" placeholder="e.g. Emergency Fund, New Laptop" required>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="goal-start-date">Start Date</label>
+            <input type="date" id="goal-start-date" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="goal-target-date">Target Date</label>
+            <input type="date" id="goal-target-date" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="goal-target-amt">Target Amount (Rs.)</label>
+            <input type="number" id="goal-target-amt" class="form-control" step="0.01" min="0.01" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="goal-starting-amt">Starting Amount (Rs.)</label>
+            <input type="number" id="goal-starting-amt" class="form-control" step="0.01" min="0" value="0">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="goal-monthly-target">Monthly Target (Rs.)</label>
+            <input type="number" id="goal-monthly-target" class="form-control" step="0.01" min="0" placeholder="Auto-calculated if blank">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="goal-priority">Priority</label>
+            <select id="goal-priority" class="form-control">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="goal-notes">Notes / Purpose</label>
+          <input type="text" id="goal-notes" class="form-control" placeholder="e.g. Reserve for unexpected medical costs">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeGoalModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Goal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Contribution Modal -->
+<div class="modal-overlay" id="contrib-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="contrib-modal-title">Record Goal Contribution</div>
+      <button class="modal-close" onclick="closeContribModal()">&times;</button>
+    </div>
+    <form id="contrib-form" onsubmit="saveGoalContribution(event)">
+      <div class="modal-body">
+        <input type="hidden" id="contrib-goal-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="contrib-amount">Contribution Amount (Rs.)</label>
+          <input type="number" id="contrib-amount" class="form-control" step="0.01" min="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contrib-date">Contribution Date</label>
+          <input type="date" id="contrib-date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contrib-desc">Description / Note</label>
+          <input type="text" id="contrib-desc" class="form-control" placeholder="e.g. Monthly Savings Deposit">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeContribModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Contribution</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/goals.js') }}"></script>
+{% endblock %}

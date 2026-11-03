@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Monthly Budget Manager{% endblock %}
+
+{% block content %}
+<!-- Budget View Switcher Tabs -->
+<div style="display: flex; gap: 12px; margin-bottom: 24px;">
+  <button id="tab-btn-monthly" class="btn btn-primary" onclick="switchBudgetTab('monthly')">Monthly Budget Manager</button>
+  <button id="tab-btn-yearly" class="btn btn-secondary" onclick="switchBudgetTab('yearly')">Yearly Budget Analytics</button>
+</div>
+
+<!-- ================= MONTHLY BUDGET SECTION ================= -->
+<div id="monthly-budget-section">
+  <!-- Period Selector & Add Budget Toolbar -->
+  <div class="filter-toolbar">
+    <div class="filter-group">
+      <span style="font-weight: 700; color: var(--primary-dark);">Budget Month:</span>
+      <select id="budget-month-select" class="form-control" onchange="loadBudgetsData()">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+
+      <select id="budget-year-select" class="form-control" onchange="loadBudgetsData()">
+        <option value="2025">2025</option>
+        <option value="2026" selected>2026</option>
+        <option value="2027">2027</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="openBudgetModal()">+ Set Budget Limit</button>
+  </div>
+
+  <!-- Budget Summary Row -->
+  <div class="dashboard-grid cards-row-3">
+    <div class="metric-card budget">
+      <div class="metric-header"><span class="metric-label">MONTHLY BUDGET</span></div>
+      <div class="metric-value" id="b-metric-total">Rs. 0</div>
+      <div class="metric-sub">Overall Limit</div>
+    </div>
+
+    <div class="metric-card expense">
+      <div class="metric-header"><span class="metric-label">SPENT SO FAR</span></div>
+      <div class="metric-value" id="b-metric-spent">Rs. 0</div>
+      <div class="metric-sub" id="b-metric-pct">0% Used</div>
+    </div>
+
+    <div class="metric-card balance">
+      <div class="metric-header"><span class="metric-label">REMAINING BUDGET</span></div>
+      <div class="metric-value" id="b-metric-rem">Rs. 0</div>
+      <div class="metric-sub">Available to Spend</div>
+    </div>
+  </div>
+
+  <!-- Budget Utilization Chart & Category Progress -->
+  <div class="dashboard-grid cards-row-2">
+    <div class="card-panel">
+      <div class="card-title-bar">
+        <div class="card-title">BUDGET UTILIZATION CHART</div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-budget-utilization"></canvas>
+      </div>
+    </div>
+
+    <div class="card-panel">
+      <div class="card-title-bar">
+        <div class="card-title">CATEGORY BUDGET PROGRESS</div>
+      </div>
+      <div class="budget-progress-list" id="budget-category-list">
+        <div class="empty-state">No category budgets set for this month.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= YEARLY BUDGET ANALYTICS SECTION ================= -->
+<div id="yearly-budget-section" style="display: none;">
+  <!-- Year Selector Toolbar -->
+  <div class="filter-toolbar">
+    <div class="filter-group">
+      <span style="font-weight: 700; color: var(--primary-dark);">Analytics Year:</span>
+      <select id="yearly-budget-year-select" class="form-control" onchange="loadYearlyBudgetData()">
+        <option value="2025">2025</option>
+        <option value="2026" selected>2026</option>
+        <option value="2027">2027</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Yearly Metric Cards -->
+  <div class="dashboard-grid cards-row-3" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="metric-card budget">
+      <div class="metric-header"><span class="metric-label">ANNUAL BUDGET</span></div>
+      <div class="metric-value" id="yb-metric-total">Rs. 0</div>
+      <div class="metric-sub">Total 12-Month Allocation</div>
+    </div>
+
+    <div class="metric-card expense">
+      <div class="metric-header"><span class="metric-label">ANNUAL SPENT</span></div>
+      <div class="metric-value" id="yb-metric-spent">Rs. 0</div>
+      <div class="metric-sub" id="yb-metric-pct">0% Used</div>
+    </div>
+
+    <div class="metric-card balance">
+      <div class="metric-header"><span class="metric-label">ANNUAL REMAINING</span></div>
+      <div class="metric-value" id="yb-metric-rem">Rs. 0</div>
+      <div class="metric-sub">Unspent Balance</div>
+    </div>
+
+    <div class="metric-card savings">
+      <div class="metric-header"><span class="metric-label">HEALTH STATUS</span></div>
+      <div class="metric-value" id="yb-metric-status" style="font-size: 1.25rem;">Normal</div>
+      <div class="metric-sub">Overall Yearly Condition</div>
+    </div>
+  </div>
+
+  <!-- 12-Month Budget vs Actual Spent Comparison Chart -->
+  <div class="card-panel" style="margin-bottom: 28px;">
+    <div class="card-title-bar">
+      <div class="card-title">12-MONTH BUDGET VS ACTUAL SPENT TREND</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-yearly-budget-trend"></canvas>
+    </div>
+  </div>
+
+  <!-- Category Annual Budget Breakdown Table -->
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">ANNUAL CATEGORY BUDGET PERFORMANCE</div>
+    </div>
+    <div class="table-responsive">
+      <table class="table-financial">
+        <thead>
+          <tr>
+            <th>Expense Category</th>
+            <th style="text-align: right;">Annual Budget</th>
+            <th style="text-align: right;">Actual Spent</th>
+            <th style="text-align: right;">Remaining</th>
+            <th style="text-align: right;">% Used</th>
+            <th style="text-align: center;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="table-yearly-budget-body">
+          <tr><td colspan="6" class="empty-state">Loading yearly budget analytics...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Budget Modal -->
+<div class="modal-overlay" id="budget-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Set Budget Limit</div>
+      <button class="modal-close" onclick="closeBudgetModal()">&times;</button>
+    </div>
+    <form id="budget-form" onsubmit="saveBudgetRecord(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="b-target-type">Budget Scope</label>
+          <select id="b-target-type" class="form-control" onchange="toggleCategorySelect()">
+            <option value="overall">Overall Monthly Budget</option>
+            <option value="category">Specific Category Budget</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="b-cat-group" style="display: none;">
+          <label class="form-label" for="b-category-id">Expense Category</label>
+          <select id="b-category-id" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="b-amount">Budget Amount (Rs.)</label>
+          <input type="number" id="b-amount" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeBudgetModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Budget</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/budgets.js') }}"></script>
+{% endblock %}

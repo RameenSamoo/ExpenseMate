@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Transaction History{% endblock %}
+
+{% block content %}
+<!-- Filter & Action Bar -->
+<div class="filter-toolbar">
+  <div class="filter-group">
+    <input type="text" id="tx-search-input" class="form-control" placeholder="Search transactions..." oninput="loadTransactionsData(1)">
+    
+    <select id="tx-type-filter" class="form-control" onchange="loadTransactionsData(1)">
+      <option value="">All Types</option>
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+
+    <select id="tx-cat-filter" class="form-control" onchange="loadTransactionsData(1)">
+      <option value="">All Categories</option>
+    </select>
+
+    <select id="tx-month-filter" class="form-control" onchange="loadTransactionsData(1)">
+      <option value="">All Months</option>
+      <option value="1">January</option>
+      <option value="2">February</option>
+      <option value="3">March</option>
+      <option value="4">April</option>
+      <option value="5">May</option>
+      <option value="6">June</option>
+      <option value="7">July</option>
+      <option value="8">August</option>
+      <option value="9">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+    </select>
+
+    <select id="tx-year-filter" class="form-control" onchange="loadTransactionsData(1)">
+      <option value="2026" selected>2026</option>
+      <option value="2025">2025</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <button class="btn btn-secondary" onclick="exportTransactionsCSV()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Export CSV
+    </button>
+    <button class="btn btn-primary" onclick="openImportModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+      Import CSV
+    </button>
+  </div>
+</div>
+
+<!-- Transactions Table Card -->
+<div class="card-panel">
+  <div class="table-responsive">
+    <table class="table-financial">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th style="text-align: right;">Amount</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-transactions-body">
+        <tr><td colspan="6" class="empty-state">Loading transactions...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-bar">
+    <div class="pagination-info" id="pagination-info-text">Showing 0 of 0 records</div>
+    <div class="pagination-controls" id="pagination-buttons"></div>
+  </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Import CSV Transactions</div>
+      <button class="modal-close" onclick="closeImportModal()">&times;</button>
+    </div>
+    <form id="import-form" onsubmit="uploadCSVFile(event)">
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          Select a CSV file to import transactions. File must contain headers:
+          <code>Date</code>, <code>Type</code>, <code>Category</code>, <code>Amount</code>, <code>Description</code>.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="csv-file-input">Choose CSV File</label>
+          <input type="file" id="csv-file-input" class="form-control" accept=".csv" required>
+        </div>
+
+        <div id="import-summary-result" style="display: none; margin-top: 14px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Upload & Import</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/transactions.js') }}"></script>
+{% endblock %}

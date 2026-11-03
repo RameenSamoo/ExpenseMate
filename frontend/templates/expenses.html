@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Expense Tracker{% endblock %}
+
+{% block content %}
+<!-- Top Metrics -->
+<div class="dashboard-grid cards-row-4">
+  <div class="metric-card expense">
+    <div class="metric-header"><span class="metric-label">TOTAL EXPENSE</span></div>
+    <div class="metric-value" id="exp-metric-total">Rs. 0</div>
+    <div class="metric-sub">Cumulative All-Time</div>
+  </div>
+
+  <div class="metric-card expense">
+    <div class="metric-header"><span class="metric-label">THIS MONTH</span></div>
+    <div class="metric-value" id="exp-metric-month">Rs. 0</div>
+    <div class="metric-sub">Current Period</div>
+  </div>
+
+  <div class="metric-card expense">
+    <div class="metric-header"><span class="metric-label">DAILY AVG</span></div>
+    <div class="metric-value" id="exp-metric-daily">Rs. 0</div>
+    <div class="metric-sub">Average Daily Spend</div>
+  </div>
+
+  <div class="metric-card balance">
+    <div class="metric-header"><span class="metric-label">TOP CATEGORY</span></div>
+    <div class="metric-value" id="exp-metric-top" style="font-size: 1.3rem;">-</div>
+    <div class="metric-sub">Highest Spending Area</div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="dashboard-grid cards-row-2">
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">EXPENSE TREND LINE CHART</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-expense-trend"></canvas>
+    </div>
+  </div>
+
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">EXPENSE BY CATEGORY</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-expense-category"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="filter-toolbar">
+  <div class="filter-group">
+    <input type="text" id="exp-search" class="form-control" placeholder="Search expenses..." oninput="loadExpenseData()">
+    
+    <select id="exp-category-filter" class="form-control" onchange="loadExpenseData()">
+      <option value="">All Categories</option>
+    </select>
+
+    <select id="exp-year-filter" class="form-control" onchange="loadExpenseData()">
+      <option value="2026" selected>2026</option>
+      <option value="2025">2025</option>
+    </select>
+  </div>
+
+  <button class="btn btn-primary" onclick="openExpenseModal()">+ Add Expense</button>
+</div>
+
+<!-- Expense History Table -->
+<div class="card-panel">
+  <div class="card-title-bar">
+    <div class="card-title">EXPENSE HISTORY</div>
+  </div>
+  <div class="table-responsive">
+    <table class="table-financial">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th style="text-align: right;">Amount</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-expense-body">
+        <tr><td colspan="5" class="empty-state">No expense records found.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expense-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="expense-modal-title">Add Expense</div>
+      <button class="modal-close" onclick="closeExpenseModal()">&times;</button>
+    </div>
+    <form id="expense-form" onsubmit="saveExpenseRecord(event)">
+      <div class="modal-body">
+        <input type="hidden" id="exp-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="exp-category">Expense Category</label>
+          <select id="exp-category" class="form-control" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-amount">Amount (Rs.)</label>
+          <input type="number" id="exp-amount" class="form-control" step="0.01" min="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-date">Date</label>
+          <input type="date" id="exp-date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-desc">Description</label>
+          <input type="text" id="exp-desc" class="form-control" placeholder="e.g. Groceries">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Expense</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/expenses.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — ExpenseMate Personal Finance Manager</title>
+  <meta name="description" content="Create your free ExpenseMate account and start managing your personal finances today.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand-dark: #2B3A52;
+      --brand-mid: #4A607A;
+      --brand-slate: #8FA3C0;
+      --accent: #E8B4A8;
+      --bg: #F7F4F0;
+      --surface: #FFFFFF;
+      --border: #E2DAD1;
+      --text: #2B3445;
+      --muted: #718096;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .auth-panel-left {
+      width: 38%;
+      background: linear-gradient(145deg, #3D5471 0%, var(--brand-mid) 50%, #6B8DAA 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 60px 52px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-panel-left::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(232,180,168,0.2) 0%, transparent 70%);
+      top: -100px;
+      right: -120px;
+      border-radius: 50%;
+    }
+
+    .auth-panel-left::after {
+      content: '';
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(143,163,192,0.2) 0%, transparent 70%);
+      bottom: -60px;
+      left: -40px;
+      border-radius: 50%;
+    }
+
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 52px;
+    }
+
+    .brand-logo-icon {
+      width: 46px;
+      height: 46px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-name { font-size: 1.4rem; font-weight: 800; color: #FFFFFF; letter-spacing: 1px; }
+    .brand-tagline { font-size: 0.72rem; color: rgba(255,255,255,0.55); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    .auth-headline {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+    .auth-headline span { color: var(--accent); }
+
+    .auth-subline {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+      max-width: 300px;
+      margin-bottom: 40px;
+    }
+
+    .step-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.9rem;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      flex-shrink: 0;
+    }
+
+    .auth-panel-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px 40px;
+      background: var(--surface);
+      overflow-y: auto;
+    }
+
+    .auth-form-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .auth-form-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .auth-form-sub {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.93rem;
+      color: var(--text);
+      background: #FDFCFB;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--brand-slate);
+      box-shadow: 0 0 0 3px rgba(143,163,192,0.2);
+      background: #FFFFFF;
+    }
+
+    .password-strength {
+      margin-top: 6px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .strength-bar {
+      height: 3px;
+      flex: 1;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .strength-bar.active-weak { background: #E53E3E; }
+    .strength-bar.active-fair { background: #DD6B20; }
+    .strength-bar.active-good { background: #38A169; }
+
+    .terms-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--brand-mid) 0%, var(--brand-dark) 100%);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(74,96,122,0.35);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(74,96,122,0.45);
+    }
+
+    .auth-divider {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .auth-divider a {
+      color: var(--brand-mid);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: #FFFFFF;
+      box-shadow: 0 8px 24px rgba(43,52,69,0.12);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-left: 4px solid var(--brand-slate);
+      animation: slideIn 0.3s ease;
+      max-width: 360px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .toast.success { border-left-color: #38A169; }
+    .toast.danger { border-left-color: #E53E3E; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .auth-panel-left { display: none; }
+      .auth-panel-right { padding: 36px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Left Panel -->
+  <div class="auth-panel-left">
+    <div class="brand-logo-wrap">
+      <div class="brand-logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2">
+          <rect x="2" y="5" width="20" height="14" rx="3"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">EXPENSEMATE</div>
+        <div class="brand-tagline">Personal Finance Manager</div>
+      </div>
+    </div>
+
+    <h1 class="auth-headline">Start Your<br><span>Financial Journey</span></h1>
+    <p class="auth-subline">Join thousands who use ExpenseMate to master their money and build real wealth.</p>
+
+    <ul class="step-list">
+      <li class="step-item">
+        <span class="step-num">1</span>
+        <span>Create your free account in under a minute</span>
+      </li>
+      <li class="step-item">
+        <span class="step-num">2</span>
+        <span>Set income sources and expense categories</span>
+      </li>
+      <li class="step-item">
+        <span class="step-num">3</span>
+        <span>Define budgets and savings goals</span>
+      </li>
+      <li class="step-item">
+        <span class="step-num">4</span>
+        <span>Track and visualize your financial progress</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="auth-panel-right">
+    <div class="auth-form-box">
+      <h2 class="auth-form-title">Create your account</h2>
+      <p class="auth-form-sub">It's free, forever. No credit card required.</p>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-fullname">Full Name</label>
+          <input type="text" id="reg-fullname" class="form-input" placeholder="Ali Hassan" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="ali@example.com" required autocomplete="email">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="reg-password">Password</label>
+            <input type="password" id="reg-password" class="form-input" placeholder="6+ characters" required oninput="updateStrength(this.value)">
+            <div class="password-strength">
+              <div class="strength-bar" id="sb1"></div>
+              <div class="strength-bar" id="sb2"></div>
+              <div class="strength-bar" id="sb3"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="reg-confirm">Confirm Password</label>
+            <input type="password" id="reg-confirm" class="form-input" placeholder="Repeat password" required>
+          </div>
+        </div>
+
+        <div style="height: 20px;"></div>
+
+        <p class="terms-note">By creating an account you agree to our terms of service and privacy policy.</p>
+
+        <button type="submit" class="btn-submit" id="register-submit-btn">Create My Account</button>
+      </form>
+
+      <p class="auth-divider">Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script>
+    function updateStrength(val) {
+      const bars = ['sb1', 'sb2', 'sb3'];
+      bars.forEach(id => {
+        document.getElementById(id).className = 'strength-bar';
+      });
+      if (val.length >= 6) {
+        document.getElementById('sb1').classList.add('active-weak');
+      }
+      if (val.length >= 10) {
+        document.getElementById('sb2').classList.add('active-fair');
+      }
+      if (val.length >= 14 || /[^a-zA-Z0-9]/.test(val)) {
+        document.getElementById('sb3').classList.add('active-good');
+      }
+    }
+  </script>
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

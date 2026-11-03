@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Personal Finance Dashboard{% endblock %}
+
+{% block content %}
+<!-- Top Date Filter Toolbar -->
+<div class="filter-toolbar">
+  <div class="filter-group">
+    <span style="font-weight: 700; color: var(--primary-dark);">Filter Period:</span>
+    <select id="dash-month-select" class="form-control">
+      <option value="1">January</option>
+      <option value="2">February</option>
+      <option value="3">March</option>
+      <option value="4">April</option>
+      <option value="5">May</option>
+      <option value="6">June</option>
+      <option value="7">July</option>
+      <option value="8">August</option>
+      <option value="9">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+    </select>
+
+    <select id="dash-year-select" class="form-control">
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+      <option value="2027">2027</option>
+    </select>
+
+    <button class="btn btn-secondary btn-sm" onclick="loadDashboardData()">Update View</button>
+  </div>
+
+  <div class="filter-group">
+    <button class="btn btn-primary btn-sm" onclick="openAddTransactionModal('expense')">+ Add Expense</button>
+    <button class="btn btn-accent btn-sm" onclick="openAddTransactionModal('income')">+ Add Income</button>
+  </div>
+</div>
+
+<!-- Dynamic Alert Banner Container -->
+<div id="dashboard-alerts-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;"></div>
+
+<!-- 6 Metric Cards Row -->
+<div class="dashboard-grid cards-row-3">
+  <div class="metric-card balance">
+    <div class="metric-header">
+      <span class="metric-label">TOTAL BALANCE</span>
+      <div class="metric-icon">Rs</div>
+    </div>
+    <div class="metric-value" id="val-balance">Rs. 0</div>
+    <div class="metric-sub">Net cumulative wealth</div>
+  </div>
+
+  <div class="metric-card income">
+    <div class="metric-header">
+      <span class="metric-label">TOTAL INCOME</span>
+      <div class="metric-icon">↑</div>
+    </div>
+    <div class="metric-value" id="val-income">Rs. 0</div>
+    <div class="metric-sub" id="sub-income">Selected Month</div>
+  </div>
+
+  <div class="metric-card expense">
+    <div class="metric-header">
+      <span class="metric-label">TOTAL EXPENSES</span>
+      <div class="metric-icon">↓</div>
+    </div>
+    <div class="metric-value" id="val-expenses">Rs. 0</div>
+    <div class="metric-sub" id="sub-expenses">Selected Month</div>
+  </div>
+
+  <div class="metric-card savings">
+    <div class="metric-header">
+      <span class="metric-label">TOTAL SAVINGS</span>
+      <div class="metric-icon">★</div>
+    </div>
+    <div class="metric-value" id="val-savings">Rs. 0</div>
+    <div class="metric-sub" id="sub-savings-rate">Savings Rate: 0%</div>
+  </div>
+
+  <div class="metric-card budget">
+    <div class="metric-header">
+      <span class="metric-label">MONTHLY BUDGET</span>
+      <div class="metric-icon">📋</div>
+    </div>
+    <div class="metric-value" id="val-budget">Rs. 0</div>
+    <div class="metric-sub" id="sub-budget">Target Spending Limit</div>
+  </div>
+
+  <div class="metric-card balance">
+    <div class="metric-header">
+      <span class="metric-label">BUDGET REMAINING</span>
+      <div class="metric-icon">⏱</div>
+    </div>
+    <div class="metric-value" id="val-budget-rem">Rs. 0</div>
+    <div class="metric-sub" id="sub-budget-pct">0% Used</div>
+  </div>
+</div>
+
+<!-- Row 2: Amount Left to Spend Donut Gauge & Cash Flow Summary Bar Chart -->
+<div class="dashboard-grid cards-row-2">
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">AMOUNT LEFT TO SPEND</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-spend-gauge"></canvas>
+      <div class="gauge-center-text">
+        <div class="gauge-amount" id="gauge-center-amt">Rs. 0</div>
+        <div class="gauge-label" id="gauge-center-lbl">LEFT</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">CASH FLOW SUMMARY</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-cash-flow"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Row 3: Expense Allocation Donut & Category Budget Status Progress Bars -->
+<div class="dashboard-grid cards-row-2">
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">EXPENSE ALLOCATION</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="chart-expense-allocation"></canvas>
+    </div>
+  </div>
+
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">BUDGET STATUS BY CATEGORY</div>
+      <a href="/budgets" class="btn btn-secondary btn-sm">Manage Budgets</a>
+    </div>
+    <div class="budget-progress-list" id="dashboard-budget-list">
+      <div class="empty-state">No budget limits configured for this month.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 4: Income Summary vs Expense Summary Breakdowns -->
+<div class="dashboard-grid cards-row-2">
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">INCOME SUMMARY</div>
+      <a href="/income" class="btn-sm" style="color: var(--primary-dark);">View All →</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table-financial">
+        <thead>
+          <tr>
+            <th>Source / Category</th>
+            <th style="text-align: right;">Amount (Rs.)</th>
+          </tr>
+        </thead>
+        <tbody id="table-income-summary">
+          <tr><td colspan="2" class="empty-state">No income records for this month.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-panel">
+    <div class="card-title-bar">
+      <div class="card-title">EXPENSE SUMMARY</div>
+      <a href="/expenses" class="btn-sm" style="color: var(--primary-dark);">View All →</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table-financial">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th style="text-align: right;">Amount (Rs.)</th>
+          </tr>
+        </thead>
+        <tbody id="table-expense-summary">
+          <tr><td colspan="2" class="empty-state">No expense records for this month.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Row 5: Recent Transactions Table -->
+<div class="card-panel" style="margin-bottom: 28px;">
+  <div class="card-title-bar">
+    <div class="card-title">RECENT TRANSACTIONS</div>
+    <a href="/transactions" class="btn btn-secondary btn-sm">View All Transactions →</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table-financial">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th style="text-align: right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody id="table-recent-transactions">
+        <tr><td colspan="5" class="empty-state">No recent transactions recorded.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="modal-overlay" id="tx-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="tx-modal-title">Add Transaction</div>
+      <button class="modal-close" onclick="closeTxModal()">&times;</button>
+    </div>
+    <form id="tx-form" onsubmit="saveDashboardTransaction(event)">
+      <div class="modal-body">
+        <input type="hidden" id="tx-type" value="expense">
+        
+        <div class="form-group">
+          <label class="form-label" for="tx-category">Category</label>
+          <select id="tx-category" class="form-control" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tx-amount">Amount (Rs.)</label>
+          <input type="number" id="tx-amount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tx-date">Date</label>
+          <input type="date" id="tx-date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tx-desc">Description</label>
+          <input type="text" id="tx-desc" class="form-control" placeholder="e.g. Weekly Groceries">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeTxModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Transaction</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Set current month/year as default on page load
+  (function() {
+    const now = new Date();
+    const ms = document.getElementById('dash-month-select');
+    const ys = document.getElementById('dash-year-select');
+    if (ms) ms.value = String(now.getMonth() + 1);
+    if (ys) ys.value = String(now.getFullYear());
+  })();
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

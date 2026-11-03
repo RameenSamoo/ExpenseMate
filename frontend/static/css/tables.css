@@ -1,0 +1,147 @@
+/* ==========================================================================
+   EXPENSEMATE - Financial Spreadsheet Table & Data Display Styling
+   ========================================================================== */
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.table-financial {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-card);
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.table-financial th {
+  background: var(--primary-slate);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 14px 18px;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+.table-financial td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+}
+
+.table-financial tbody tr:nth-child(even) {
+  background: #FCFAF7;
+}
+
+.table-financial tbody tr:hover {
+  background: var(--surface-muted);
+}
+
+/* Sub-header / Category summary row in spreadsheet */
+.table-financial tr.subheader-row td {
+  background: var(--accent-terracotta);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Amount Formatting */
+.amount-income {
+  color: #2F855A;
+  font-weight: 700;
+}
+
+.amount-expense {
+  color: #C53030;
+  font-weight: 700;
+}
+
+/* Action Buttons inside Table */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: var(--surface-muted);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-icon:hover {
+  background: var(--primary-slate);
+  color: #FFFFFF;
+  border-color: var(--primary-slate);
+}
+
+.btn-icon.delete:hover {
+  background: #E53E3E;
+  border-color: #E53E3E;
+  color: #FFFFFF;
+}
+
+/* Pagination Bar */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--surface-card);
+  border-top: 1px solid var(--border-light);
+}
+
+.pagination-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-page {
+  padding: 6px 12px;
+  border: 1px solid var(--border-light);
+  background: #FFFFFF;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: var(--primary-slate);
+  color: #FFFFFF;
+}
+
+.btn-page:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-page.active {
+  background: var(--primary-dark);
+  color: #FFFFFF;
+  border-color: var(--primary-dark);
+}

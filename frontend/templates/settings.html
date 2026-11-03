@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Account & Preference Settings{% endblock %}
+
+{% block content %}
+<div class="card-panel" style="max-width: 680px; margin: 0 auto;">
+  <div class="card-title-bar">
+    <div class="card-title">PROFILE & PREFERENCES</div>
+  </div>
+
+  <form id="settings-form" onsubmit="saveUserProfile(event)">
+    <div class="form-group">
+      <label class="form-label" for="set-fullname">Full Name</label>
+      <input type="text" id="set-fullname" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="set-email">Email Address</label>
+      <input type="email" id="set-email" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="set-currency">Preferred Currency Symbol</label>
+      <select id="set-currency" class="form-control">
+        <option value="PKR" selected>PKR (Rs.)</option>
+        <option value="USD">USD ($)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="GBP">GBP (£)</option>
+        <option value="INR">INR (₹)</option>
+      </select>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid var(--border-light); margin: 24px 0;">
+
+    <h4 style="font-size: 0.95rem; color: var(--primary-dark); font-weight: 700; margin-bottom: 14px;">Change Password (Optional)</h4>
+
+    <div class="form-group">
+      <label class="form-label" for="set-curr-pass">Current Password</label>
+      <input type="password" id="set-curr-pass" class="form-control" placeholder="Required only if changing password">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="set-new-pass">New Password</label>
+      <input type="password" id="set-new-pass" class="form-control" placeholder="At least 6 characters">
+    </div>
+
+    <div style="margin-top: 24px; text-align: right;">
+      <button type="submit" class="btn btn-primary">Save Settings</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

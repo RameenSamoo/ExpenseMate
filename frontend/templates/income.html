@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Income Tracker{% endblock %}
+
+{% block content %}
+<!-- Top Metrics Row -->
+<div class="dashboard-grid cards-row-4">
+  <div class="metric-card income">
+    <div class="metric-header"><span class="metric-label">TOTAL INCOME</span></div>
+    <div class="metric-value" id="inc-metric-total">Rs. 0</div>
+    <div class="metric-sub">Cumulative All-Time</div>
+  </div>
+
+  <div class="metric-card income">
+    <div class="metric-header"><span class="metric-label">THIS MONTH</span></div>
+    <div class="metric-value" id="inc-metric-month">Rs. 0</div>
+    <div class="metric-sub">Current Period</div>
+  </div>
+
+  <div class="metric-card income">
+    <div class="metric-header"><span class="metric-label">AVG MONTHLY</span></div>
+    <div class="metric-value" id="inc-metric-avg">Rs. 0</div>
+    <div class="metric-sub">Monthly Average</div>
+  </div>
+
+  <div class="metric-card balance">
+    <div class="metric-header"><span class="metric-label">TOP SOURCE</span></div>
+    <div class="metric-value" id="inc-metric-top" style="font-size: 1.3rem;">-</div>
+    <div class="metric-sub">Highest Contributor</div>
+  </div>
+</div>
+
+<!-- Income Trend Chart -->
+<div class="card-panel" style="margin-bottom: 28px;">
+  <div class="card-title-bar">
+    <div class="card-title">INCOME TREND CHART</div>
+  </div>
+  <div class="chart-container">
+    <canvas id="chart-income-trend"></canvas>
+  </div>
+</div>
+
+<!-- Filter & Add Income Bar -->
+<div class="filter-toolbar">
+  <div class="filter-group">
+    <input type="text" id="inc-search" class="form-control" placeholder="Search income..." oninput="loadIncomeData()">
+    
+    <select id="inc-category-filter" class="form-control" onchange="loadIncomeData()">
+      <option value="">All Income Sources</option>
+    </select>
+
+    <select id="inc-year-filter" class="form-control" onchange="loadIncomeData()">
+      <option value="2026" selected>2026</option>
+      <option value="2025">2025</option>
+    </select>
+  </div>
+
+  <button class="btn btn-primary" onclick="openIncomeModal()">+ Add Income</button>
+</div>
+
+<!-- Income History Table -->
+<div class="card-panel">
+  <div class="card-title-bar">
+    <div class="card-title">INCOME HISTORY</div>
+  </div>
+  <div class="table-responsive">
+    <table class="table-financial">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Source / Category</th>
+          <th>Description</th>
+          <th style="text-align: right;">Amount</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-income-body">
+        <tr><td colspan="5" class="empty-state">No income records found.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Income Modal -->
+<div class="modal-overlay" id="income-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="income-modal-title">Add Income</div>
+      <button class="modal-close" onclick="closeIncomeModal()">&times;</button>
+    </div>
+    <form id="income-form" onsubmit="saveIncomeRecord(event)">
+      <div class="modal-body">
+        <input type="hidden" id="inc-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="inc-category">Income Source</label>
+          <select id="inc-category" class="form-control" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inc-amount">Amount (Rs.)</label>
+          <input type="number" id="inc-amount" class="form-control" step="0.01" min="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inc-date">Date</label>
+          <input type="date" id="inc-date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inc-desc">Description</label>
+          <input type="text" id="inc-desc" class="form-control" placeholder="e.g. Monthly Salary">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeIncomeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Income</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/income.js') }}"></script>
+{% endblock %}
