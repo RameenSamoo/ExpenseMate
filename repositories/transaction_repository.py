@@ -143,3 +143,128 @@ class TransactionRepository(BaseRepository):
             'limit': int(limit),
             'total_pages': max(1, (total_count + int(limit) - 1) // int(limit))
         }
+
+    def get_total_by_type(self, user_id, transaction_type, month=None, year=None):
+        """Retrieves sum of transactions for a given type, optionally filtered by month/year."""
+        where_clauses = ["user_id = ?", "transaction_type = ?"]
+        params = [user_id, transaction_type]
+        if month:
+            where_clauses.append("CAST(strftime('%m', transaction_date) AS INTEGER) = ?")
+            params.append(int(month))
+        if year:
+            where_clauses.append("CAST(strftime('%Y', transaction_date) AS INTEGER) = ?")
+            params.append(int(year))
+        query = f"SELECT COALESCE(SUM(amount), 0.0) as total FROM transactions WHERE {' AND '.join(where_clauses)}"
+        row = self.fetch_one(query, params)
+        return float(row['total']) if row and row['total'] is not None else 0.0
+
+    def get_category_totals(self, user_id, transaction_type, month=None, year=None):
+        """Retrieves categorized spending or income totals for charts and allocations."""
+        where_clauses = ["t.user_id = ?", "t.transaction_type = ?"]
+        params = [user_id, transaction_type]
+        if month:
+            where_clauses.append("CAST(strftime('%m', t.transaction_date) AS INTEGER) = ?")
+            params.append(int(month))
+        if year:
+            where_clauses.append("CAST(strftime('%Y', t.transaction_date) AS INTEGER) = ?")
+            params.append(int(year))
+        query = f"""
+            SELECT c.name as category_name, COALESCE(SUM(t.amount), 0.0) as total
+            FROM transactions t
+            JOIN categories c ON t.category_id = c.id
+            WHERE {' AND '.join(where_clauses)}
+            GROUP BY c.name
+            ORDER BY total DESC
+        """
+        return self.fetch_all(query, params)
+
+    def get_top_category(self, user_id, transaction_type, year=None):
+        """Retrieves the highest spending/income category name."""
+        where_clauses = ["t.user_id = ?", "t.transaction_type = ?"]
+        params = [user_id, transaction_type]
+        if year:
+            where_clauses.append("CAST(strftime('%Y', t.transaction_date) AS INTEGER) = ?")
+            params.append(int(year))
+        query = f"""
+            SELECT c.name as category_name, SUM(t.amount) as total
+            FROM transactions t
+            JOIN categories c ON t.category_id = c.id
+            WHERE {' AND '.join(where_clauses)}
+            GROUP BY c.name ORDER BY total DESC LIMIT 1
+        """
+        row = self.fetch_one(query, params)
+        return row['category_name'] if row else 'N/A'
+
+    def get_monthly_trend(self, user_id, transaction_type, year):
+        """Retrieves monthly transaction amounts (Jan-Dec) for trend charts."""
+        query = """
+            SELECT CAST(strftime('%m', transaction_date) AS INTEGER) as month_num,
+                   COALESCE(SUM(amount), 0.0) as total
+            FROM transactions
+            WHERE user_id = ? AND transaction_type = ?
+            AND CAST(strftime('%Y', transaction_date) AS INTEGER) = ?
+            GROUP BY month_num ORDER BY month_num ASC
+        """
+        return self.fetch_all(query, (user_id, transaction_type, year))
+
+    def get_recent_transactions(self, user_id, limit=10):
+        """Retrieves most recent transactions for the dashboard."""
+        query = """
+            SELECT t.*, c.name as category_name
+            FROM transactions t
+            JOIN categories c ON t.category_id = c.id
+            WHERE t.user_id = ?
+            ORDER BY t.transaction_date DESC, t.id DESC
+            LIMIT ?
+        """
+        return self.fetch_all(query, (user_id, limit))
+
+    def get_most_expensive_transaction(self, user_id, month, year):
+        """Retrieves the single largest expense transaction for a month."""
+        query = """
+            SELECT t.*, c.name as category_name FROM transactions t
+            JOIN categories c ON t.category_id = c.id
+            WHERE t.user_id = ? AND t.transaction_type = 'expense'
+            AND CAST(strftime('%m', t.transaction_date) AS INTEGER) = ?
+            AND CAST(strftime('%Y', t.transaction_date) AS INTEGER) = ?
+            ORDER BY t.amount DESC LIMIT 1
+        """
+        return self.fetch_one(query, (user_id, month, year))
+
+    def get_monthly_transaction_count(self, user_id, month, year):
+        """Counts total transactions executed in a month."""
+        query = """
+            SELECT COUNT(*) as cnt FROM transactions
+            WHERE user_id = ?
+            AND CAST(strftime('%m', transaction_date) AS INTEGER) = ?
+            AND CAST(strftime('%Y', transaction_date) AS INTEGER) = ?
+        """
+        row = self.fetch_one(query, (user_id, month, year))
+        return row['cnt'] if row else 0
+
+    def get_cash_flow_trend(self, user_id, limit=24):
+        """Retrieves historical income vs expense sums by month."""
+        query = """
+            SELECT strftime('%Y-%m', transaction_date) as month_str,
+                   transaction_type,
+                   COALESCE(SUM(amount), 0.0) as total
+            FROM transactions
+            WHERE user_id = ?
+            GROUP BY month_str, transaction_type
+            ORDER BY month_str ASC LIMIT ?
+        """
+        return self.fetch_all(query, (user_id, limit))
+
+    def get_monthly_category_spending_map(self, user_id, month, year):
+        """Retrieves category-level spending map for month comparison."""
+        query = """
+            SELECT c.name as category_name, COALESCE(SUM(t.amount), 0.0) as total
+            FROM categories c
+            LEFT JOIN transactions t ON c.id = t.category_id AND t.user_id = ? AND t.transaction_type = 'expense'
+            AND CAST(strftime('%m', t.transaction_date) AS INTEGER) = ?
+            AND CAST(strftime('%Y', t.transaction_date) AS INTEGER) = ?
+            WHERE c.user_id = ? AND c.type = 'expense'
+            GROUP BY c.name
+        """
+        rows = self.fetch_all(query, (user_id, month, year, user_id))
+        return {r['category_name']: float(r['total']) for r in rows}
