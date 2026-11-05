@@ -50,7 +50,9 @@ def api_add_income():
         transaction_type='income',
         amount=data.get('amount'),
         description=data.get('description'),
-        transaction_date=data.get('transaction_date')
+        transaction_date=data.get('transaction_date'),
+        payment_method=data.get('payment_method', 'Cash'),
+        notes=data.get('notes', '')
     )
     if not success:
         return jsonify({'success': False, 'message': result}), 400

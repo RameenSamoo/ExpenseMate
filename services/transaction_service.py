@@ -1,10 +1,12 @@
 from database.database import execute_query
 from utils.validators import is_valid_date, is_positive_number, sanitize_string
 
-def add_transaction(user_id, category_id, transaction_type, amount, description, transaction_date):
+def add_transaction(user_id, category_id, transaction_type, amount, description, transaction_date, payment_method='Cash', notes=''):
     transaction_type = sanitize_string(transaction_type).lower()
     description = sanitize_string(description)
     transaction_date = sanitize_string(transaction_date)
+    payment_method = sanitize_string(payment_method) or 'Cash'
+    notes = sanitize_string(notes) or ''
 
     if transaction_type not in ('income', 'expense'):
         return False, "Transaction type must be 'income' or 'expense'."
@@ -24,14 +26,14 @@ def add_transaction(user_id, category_id, transaction_type, amount, description,
         return False, f"Category '{category['name']}' is a {category['type']} category, cannot be used for {transaction_type}."
 
     tx_id = execute_query(
-        """INSERT INTO transactions (user_id, category_id, transaction_type, amount, description, transaction_date)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (user_id, category_id, transaction_type, float(amount), description, transaction_date),
+        """INSERT INTO transactions (user_id, category_id, transaction_type, amount, description, transaction_date, payment_method, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, category_id, transaction_type, float(amount), description, transaction_date, payment_method, notes),
         commit=True
     )
     return True, get_transaction_by_id(user_id, tx_id)
 
-def update_transaction(user_id, transaction_id, category_id=None, amount=None, description=None, transaction_date=None):
+def update_transaction(user_id, transaction_id, category_id=None, amount=None, description=None, transaction_date=None, payment_method=None, notes=None):
     tx = get_transaction_by_id(user_id, transaction_id)
     if not tx:
         return False, "Transaction not found or access denied."
@@ -66,6 +68,14 @@ def update_transaction(user_id, transaction_id, category_id=None, amount=None, d
             return False, "Invalid transaction date format."
         updates.append("transaction_date = ?")
         params.append(sanitize_string(transaction_date))
+
+    if payment_method is not None:
+        updates.append("payment_method = ?")
+        params.append(sanitize_string(payment_method))
+
+    if notes is not None:
+        updates.append("notes = ?")
+        params.append(sanitize_string(notes))
 
     if not updates:
         return True, tx

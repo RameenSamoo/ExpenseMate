@@ -28,13 +28,16 @@ def get_db():
         conn.close()
 
 def init_db():
-    """Reads schema.sql and initializes the SQLite database tables."""
+    """Reads schema.sql and initializes the SQLite database tables, then applies any pending migrations."""
     schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
     with open(schema_path, 'r', encoding='utf-8') as f:
         schema_sql = f.read()
 
     with get_db() as conn:
         conn.executescript(schema_sql)
+        # Apply versioned database migrations
+        from migrations.migrator import run_migrations
+        run_migrations(conn)
 
 def execute_query(query, params=(), fetch_all=None, fetch_one=False, commit=False):
     """Utility helper for executing parameterized SQL queries safely."""

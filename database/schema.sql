@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS transactions (
     amount REAL NOT NULL CHECK(amount > 0),
     description TEXT,
     transaction_date DATE NOT NULL,
+    payment_method TEXT DEFAULT 'Cash',
+    notes TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
@@ -41,6 +43,7 @@ CREATE TABLE IF NOT EXISTS budgets (
     month INTEGER NOT NULL CHECK(month BETWEEN 1 AND 12),
     year INTEGER NOT NULL CHECK(year >= 2000),
     amount REAL NOT NULL CHECK(amount >= 0),
+    rollover_amount REAL DEFAULT 0.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
